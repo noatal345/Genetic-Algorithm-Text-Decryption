@@ -91,6 +91,34 @@ def init_first_generation(num_of_strings, length, legal_characters):
     return list_of_strings
 
 
+def generate_next_generation(generation_strings):
+    new_generation_strings = []
+    # sample 2 strings and a crossover point for range (len(generation_strings)) times
+    for number_of_string in range(len(generation_strings)):
+        # create a list of numbers to randomly sample the strings from
+        numbers = []
+        # create a tuple of the strings and their fitness
+        strings_fitness = []
+        for string in generation_strings:
+            # calculate the fitness of each string
+            fitness = overall_fitness(string)
+            # add the string and its fitness to the list of strings and their fitness
+            strings_fitness.append((string, fitness))
+            for i in range(fitness):
+                numbers.append(i)
+        # choose 2 random numbers from the list of numbers - the strings that will continue to the next generation
+        first_str = random.choice(numbers)
+        second_str = random.choice(numbers)
+        # choose a random number from 0 to 25 - the crossover position
+        random_number = random.randint(0, 25)
+        # create the new string
+        new_string = generation_strings[first_str][:random_number] + generation_strings[second_str][random_number:]
+        # add the new string to the new generation
+        new_generation_strings.append(new_string)
+    # return the new generation
+    return new_generation_strings
+
+
 # This is the main program
 # This program receives a path to an encoded txt file as argument and decode the file content using genetic algorithm.
 # the program creates 2 new files:
@@ -113,6 +141,8 @@ def main():
     # create a list of strings - the first generation
     generation_strings = init_first_generation(number_of_strings, length_of_string, abc_dictionary)
     print(generation_strings)
+    next_gen = generate_next_generation(generation_strings)
+    print(next_gen)
 
 if __name__ == '__main__':
     main()
