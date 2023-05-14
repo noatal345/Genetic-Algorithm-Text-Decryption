@@ -5,7 +5,7 @@ import random
 def create_english_dictionary(filename):
     # create a hash set
     english_dict = set()
-    # open filename and append each value in each row to the english dictionary.
+    # open filename and append each value in each row to the english common_words_dictionary.
     with open(filename) as f:
         for line in f:
             english_dict.add(line.strip())
@@ -15,8 +15,8 @@ def create_english_dictionary(filename):
 
 
 # This function receives a path to a txt file as argument.
-# The function reads the file and creates a dictionary from the file.
-# The function returns the new dictionary where the key is the first word and the value is the second of each row.
+# The function reads the file and creates a common_words_dictionary from the file.
+# The function returns the new common_words_dictionary where the key is the first word and the value is the second of each row.
 def create_dictionary(filename):
     new_dict = {}
     # open the filename and read each line.
@@ -33,7 +33,7 @@ def create_dictionary(filename):
             key = key.strip()
             # convert the value to float.
             value = float(value)
-            # add the key and value to the dictionary.
+            # add the key and value to the common_words_dictionary.
             new_dict[key] = value
     f.close()
     return new_dict
@@ -84,7 +84,7 @@ def count_words(filename):
 
 
 # the main program
-# create a dictionary of english words according to the dictionary file.
+# create a common_words_dictionary of english words according to the common_words_dictionary file.
 english_dict = create_english_dictionary("dict.txt")
 num_of_words, num_of_chars = count_words("enc.txt")
 print("number of chars = ", num_of_chars)

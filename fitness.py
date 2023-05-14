@@ -4,7 +4,7 @@
 # language.
 # 3. two_letter_frequency_fitness: compare the 2 letter frequency of the file to the 2 letter frequency of the
 # english language
-import re
+import os
 import ex2
 
 common_words_set = ex2.create_english_dictionary("dict.txt")
@@ -37,7 +37,7 @@ def permute_file(file, optional_alphabet_dictionary):
     f.close()
 
 
-def dictionary_fitness(file):
+def dictionary_fitness(file, num_of_words_in_file):
     fitness = 0
     with open(file, 'r') as f:
         for line in f:
@@ -46,7 +46,7 @@ def dictionary_fitness(file):
             for word in words:
                 if word in common_words_set:
                     fitness += 1
-    return fitness
+    return (num_of_words_in_file - fitness) / num_of_words_in_file
 
 
 def letter_frequency_fitness(file):
@@ -103,6 +103,17 @@ def two_letter_frequency_fitness(file):
     return fitness / len(english_2letter_frequency)
 
 
-print("common_words_dictionary fitness = ", dictionary_fitness("temp.txt"))
+def overall_fitness(optional_alphabet_dictionary, file, num_of_words_in_file):
+    permute_file(file, optional_alphabet_dictionary)
+    w1, w2, w3 = 0.5, 0.25, 0.25
+    fitness = w1 * dictionary_fitness("decrypted_file.txt", num_of_words_in_file) + w2 * letter_frequency_fitness(
+        "decrypted_file.txt") + w3 * two_letter_frequency_fitness("decrypted_file.txt")
+    # remove the decrypted file
+    os.remove("decrypted_file.txt")
+
+    return fitness
+
+
+print("common_words_dictionary fitness = ", dictionary_fitness("temp.txt", 7))
 print("letter frequency fitness = ", letter_frequency_fitness("enc.txt"))
 print("two letter frequency fitness = ", two_letter_frequency_fitness("enc.txt"))
