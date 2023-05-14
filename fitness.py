@@ -1,5 +1,5 @@
 # in this  file we created three fitness functions:
-# 1. dictionary_fitness: search the number of word from file that appear in the dictionary
+# 1. dictionary_fitness: search the number of word from file that appear in the common_words_dictionary
 # 2. letter_frequency_fitness: compare the letter frequency of the file to the letter frequency of the english
 # language.
 # 3. two_letter_frequency_fitness: compare the 2 letter frequency of the file to the 2 letter frequency of the
@@ -7,9 +7,34 @@
 import re
 import ex2
 
-dictionary = ex2.create_dictionary("dict.txt")
+common_words_dictionary = ex2.create_dictionary("dict.txt")
 english_letter_frequency = ex2.create_dictionary("Letter_Freq.txt")
 english_2letter_frequency = ex2.create_dictionary("Letter2_Freq.txt")
+
+
+# this function will take the original encrypted file and an optional_alphabet_dictionary -
+# a permutation of the alphabet and will create a new file with the letters permuted
+# according to the optional_alphabet_dictionary.
+def permute_file(file, optional_alphabet_dictionary):
+    # open the file
+    with open(file, 'r') as f:
+        # read the file
+        file = f.read().upper()
+        # create a new file
+        new_file = open("decrypted_file.txt", "w")
+        # for each letter in the file, if the letter is in the optinal_alphabet_dictionary, replace it with
+        # the value from the optional_alphabet_dictionary.
+        # if the letter is not in the common_words_dictionary, leave it as is.
+        for letter in file:
+            if letter.isalpha():
+                if letter in optional_alphabet_dictionary:
+                    new_file.write(optional_alphabet_dictionary[letter])
+                else:
+                    new_file.write(letter)
+            else:
+                new_file.write(letter)
+    new_file.close()
+    f.close()
 
 
 def dictionary_fitness(file):
@@ -20,10 +45,11 @@ def dictionary_fitness(file):
         file = f.read().upper()
         # split the file into words by spaces and new lines
         file = re.split(r'[\n\s]', file)
-        # count the number of words from the file that appear in the dictionary
+        # count the number of words from the file that appear in the common_words_dictionary
         for word in file:
-            if word in dictionary:
+            if word in common_words_dictionary:
                 fitness += 1
+    f.close()
 
     return fitness
 
@@ -49,6 +75,7 @@ def letter_frequency_fitness(file):
         for letter in file_letter_frequency:
             if letter in english_letter_frequency:
                 fitness += pow(file_letter_frequency[letter] - english_letter_frequency[letter], 2)
+    f.close()
 
     return fitness / len(english_letter_frequency)
 
@@ -76,10 +103,11 @@ def two_letter_frequency_fitness(file):
         for two_letter in file_2letter_frequency:
             if two_letter in english_2letter_frequency:
                 fitness += pow(file_2letter_frequency[two_letter] - english_2letter_frequency[two_letter], 2)
+    f.close()
 
     return fitness / len(english_2letter_frequency)
 
 
-print("dictionary fitness = ", dictionary_fitness("enc.txt"))
+print("common_words_dictionary fitness = ", dictionary_fitness("enc.txt"))
 print("letter frequency fitness = ", letter_frequency_fitness("enc.txt"))
 print("two letter frequency fitness = ", two_letter_frequency_fitness("enc.txt"))
