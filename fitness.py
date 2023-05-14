@@ -7,7 +7,7 @@
 import re
 import ex2
 
-common_words_dictionary = ex2.create_dictionary("dict.txt")
+common_words_set = ex2.create_english_dictionary("dict.txt")
 english_letter_frequency = ex2.create_dictionary("Letter_Freq.txt")
 english_2letter_frequency = ex2.create_dictionary("Letter2_Freq.txt")
 
@@ -39,18 +39,13 @@ def permute_file(file, optional_alphabet_dictionary):
 
 def dictionary_fitness(file):
     fitness = 0
-    # open the file
     with open(file, 'r') as f:
-        # read the file
-        file = f.read().upper()
-        # split the file into words by spaces and new lines
-        file = re.split(r'[\n\s]', file)
-        # count the number of words from the file that appear in the common_words_dictionary
-        for word in file:
-            if word in common_words_dictionary:
-                fitness += 1
-    f.close()
-
+        for line in f:
+            # Split each line into words and check if each word appears in the set of common words
+            words = line.upper().strip().split()
+            for word in words:
+                if word in common_words_set:
+                    fitness += 1
     return fitness
 
 
@@ -108,6 +103,6 @@ def two_letter_frequency_fitness(file):
     return fitness / len(english_2letter_frequency)
 
 
-print("common_words_dictionary fitness = ", dictionary_fitness("enc.txt"))
+print("common_words_dictionary fitness = ", dictionary_fitness("temp.txt"))
 print("letter frequency fitness = ", letter_frequency_fitness("enc.txt"))
 print("two letter frequency fitness = ", two_letter_frequency_fitness("enc.txt"))
