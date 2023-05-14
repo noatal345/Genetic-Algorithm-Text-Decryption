@@ -7,6 +7,7 @@
 import os
 import ex2
 
+# create a helper set and dictionary's to use in the fitness functions.
 common_words_set = ex2.create_english_dictionary("dict.txt")
 english_letter_frequency = ex2.create_dictionary("Letter_Freq.txt")
 english_2letter_frequency = ex2.create_dictionary("Letter2_Freq.txt")
@@ -24,7 +25,8 @@ def permute_file(file, optional_alphabet_dictionary):
         new_file = open("decrypted_file.txt", "w")
         # for each letter in the file, if the letter is in the optinal_alphabet_dictionary, replace it with
         # the value from the optional_alphabet_dictionary.
-        # if the letter is not in the common_words_dictionary, leave it as is.
+        # if the letter is not in the optional_alphabet_dictionary, leave it as is.
+        # if the char is not a letter, leave it as is.
         for letter in file:
             if letter.isalpha():
                 if letter in optional_alphabet_dictionary:
@@ -37,7 +39,18 @@ def permute_file(file, optional_alphabet_dictionary):
     f.close()
 
 
+# todo - maybe return something else?
 def dictionary_fitness(file, num_of_words_in_file):
+    """
+    The dictionary_fitness function takes in a file and the number of words in that file.
+    It then opens the file, reads each line, splits each line into words, and checks if
+    each word appears in the set of common words. If it does appear, fitness is incremented by 1.
+    The function returns (num_of_words - fitness) / num_of_words.
+
+    :param file: The file to check
+    :param num_of_words_in_file: The number of words in the file
+    :return: A float between 0 and 1, where 0 is the best fitness score
+    """
     fitness = 0
     with open(file, 'r') as f:
         for line in f:
@@ -50,6 +63,15 @@ def dictionary_fitness(file, num_of_words_in_file):
 
 
 def letter_frequency_fitness(file):
+    """
+    The letter_frequency_fitness function takes a file as input and returns the fitness of that file.
+    The fitness is calculated by comparing the letter frequency of each letter in the english language to
+    the letter frequency of each letter in the given file. The function then sums up all these differences,
+    squares them, and divides by 26 (the number of letters in the alphabet). This gives us a value between 0 and 1.
+
+    :param file: The file to check
+    :return: The fitness of a file as a float between 0 and 1, where 0 is the best fitness score
+    """
     fitness = 0
     file_letter_frequency = {}
     # open the file
@@ -76,6 +98,17 @@ def letter_frequency_fitness(file):
 
 
 def two_letter_frequency_fitness(file):
+    """
+    The two_letter_frequency_fitness function takes in a file and returns the fitness of that file.
+    The fitness is calculated by comparing the two letter frequency of each character in the file to
+    the two letter frequency of english language. The function first opens and reads the given file,
+    then counts how many times each 2 character appears in it. It then normalizes these counts to get frequencies,
+    and compares them with those from an English dictionary (which are already normalized). Finally, it calculates
+    the sum squared difference between the two dictionaries and returns it.
+
+    :param file: The file to check
+    :return: The sum of the squares of the differences between the two letter frequencies of the file and the english language
+    """
     fitness = 0
     file_2letter_frequency = {}
     # open the file
@@ -104,6 +137,17 @@ def two_letter_frequency_fitness(file):
 
 
 def overall_fitness(optional_alphabet_dictionary, file, num_of_words_in_file):
+    """
+    The overall_fitness function takes in an optional_alphabet_dictionary, a file to be decrypted, and the number of words
+    in the file. It then calls permute_file on that dictionary and file. The function then calculates fitness by calling
+    the three fitness functions (dictionary, letter frequency, two-letter frequency) with weights w1 for dictionary
+    fitness, w2 for letter frequency fitness, and w3 for two-letter frequency fitness. Finally, it returns this value.
+
+    :param optional_alphabet_dictionary: Pass the current permutation of the alphabet to be used in
+    :param file: Specify the file to be decrypted
+    :param num_of_words_in_file: Specify the number of words in the file
+    :return: The fitness of the current permutation
+    """
     permute_file(file, optional_alphabet_dictionary)
     w1, w2, w3 = 0.5, 0.25, 0.25
     fitness = w1 * dictionary_fitness("decrypted_file.txt", num_of_words_in_file) + w2 * letter_frequency_fitness(
@@ -112,8 +156,3 @@ def overall_fitness(optional_alphabet_dictionary, file, num_of_words_in_file):
     os.remove("decrypted_file.txt")
 
     return fitness
-
-
-print("common_words_dictionary fitness = ", dictionary_fitness("temp.txt", 7))
-print("letter frequency fitness = ", letter_frequency_fitness("enc.txt"))
-print("two letter frequency fitness = ", two_letter_frequency_fitness("enc.txt"))

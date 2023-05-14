@@ -5,6 +5,14 @@ import random
 
 
 def fix_permutation_dict(permutation_dict):
+    """
+    The fix_permutation_dict function takes a dictionary that is supposed to be a permutation of the alphabet and
+    attempts to fix it if it is not. It does this by removing duplicate values from the dictionary, replacing them with
+    values that are not already in use. If there are no more available values, then we cannot fix the dictionary.
+
+    :param permutation_dict: A dictionary that is supposed to be a permutation of the alphabet
+    :return: A dictionary that is a valid permutation
+    """
     values = set()
     duplicates_keys = set()
 
@@ -32,6 +40,15 @@ def fix_permutation_dict(permutation_dict):
 
 
 def mutate_permutation_dict(permutation_dict, num_of_mutations):
+    """
+    The mutate_permutation_dict function takes in a permutation dictionary and the number of mutations to be made.
+    It then randomly chooses two keys from the dictionary, swaps their values, and returns the mutated permutation
+    dictionary.
+
+    :param permutation_dict: A dictionary that is a permutation of the alphabet
+    :param num_of_mutations: Determine how many times the values of two keys in the dictionary are swapped
+    :return: A dictionary that is a permutation of the alphabet after being mutated
+    """
     for i in range(num_of_mutations):
         # randomly choose two keys from the dictionary
         keys = list(permutation_dict.keys())
