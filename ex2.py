@@ -5,18 +5,18 @@ import random
 def create_english_dictionary(filename):
     # create a hash set
     english_dict = set()
-    # open filename and append each value in each row to the english common_words_dictionary.
+    # open filename and append each value in each row to the english dictionary.
     with open(filename) as f:
         for line in f:
-            english_dict.add(line.strip())
+            english_dict.add(line.upper().strip())
     # close file
     f.close()
     return english_dict
 
 
 # This function receives a path to a txt file as argument.
-# The function reads the file and creates a common_words_dictionary from the file.
-# The function returns the new common_words_dictionary where the key is the first word and the value is the second of each row.
+# The function reads the file and creates a dictionary from the file.
+# The function returns the new dictionary where the key is the first word and the value is the second of each row.
 def create_dictionary(filename):
     new_dict = {}
     # open the filename and read each line.
@@ -33,7 +33,7 @@ def create_dictionary(filename):
             key = key.strip()
             # convert the value to float.
             value = float(value)
-            # add the key and value to the common_words_dictionary.
+            # add the key and value to the dictionary.
             new_dict[key] = value
     f.close()
     return new_dict
@@ -66,41 +66,53 @@ def count_words(filename):
     f.close()
     return numer_of_words, number_of_char
 
-
-# def init_first_generation(num_of_strings, length, legal_characters):
-#     # create a list of strings
-#     list_of_strings = []
-#
-#     # create num_of_strings strings with length characters each of permutations of legal_characters
-#     for i in range(num_of_strings):
-#         new_string = ""
-#         for j in range(length):
-#             # choose a random character from legal_characters
-#             char = random.choice(legal_characters)
-#             new_string += char
-#
-#
-
-
-
-# the main program
-# create a common_words_dictionary of english words according to the common_words_dictionary file.
-english_dict = create_english_dictionary("dict.txt")
-num_of_words, num_of_chars = count_words("enc.txt")
-print("number of chars = ", num_of_chars)
-print("number of words = ", num_of_words)
-a = create_dictionary("Letter2_Freq.txt")
-b = create_dictionary("Letter_Freq.txt")
-print("len(a)")
-print(len(a))
-print("len(b)")
-print(len(b))
-print(a.items())
-print(b.items())
+# This function receives a number of strings, length of each string and a set of legal characters.
+# The function returns a list of strings where each string is a permutation of the legal characters without repeats.
+def init_first_generation(num_of_strings, length, legal_characters):
+    # Create a list of strings - The generation to return
+    list_of_strings = []
+    # Cope the legal_characters to a new set
+    characters_left = set(legal_characters)
+    # create num_of_strings number of strings with the length of length each of legal_characters permutations
+    for i in range(num_of_strings):
+        new_string = ""
+        for j in range(length):
+            # choose a random character from legal_characters
+            char = random.choice(list(characters_left))
+            # add the character to the new string
+            new_string += char
+            # remove the character from the set of characters left to choose from
+            characters_left.remove(char)
+        # add the new string to the list of strings
+        list_of_strings.append(new_string)
+        # Reset the characters_left set for the next string
+        characters_left = set(legal_characters)
+    # return the list of strings
+    return list_of_strings
 
 
+# This is the main program
+# This program receives a path to an encoded txt file as argument and decode the file content using genetic algorithm.
+# the program creates 2 new files:
+# plain.txt an encrypted txt file of the original encoded file.
+# perm.txt which will contain its permutation.
+def main():
+    # create a dictionary of words according to the english dictionary file.
+    english_dict = create_english_dictionary("dict.txt")
+    # count the number of words and chars int the encoded file.
+    num_of_words, num_of_chars = count_words("enc.txt")
+    # save the characters frequencies in dictionaries
+    Letter2_Freq = create_dictionary("Letter2_Freq.txt")
+    Letter_Freq = create_dictionary("Letter_Freq.txt")
+    # create a set of legal characters
+    abc_dictionary = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'k', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                      'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}
+    # define parameters
+    number_of_strings = 32
+    length_of_string = 26
+    # create a list of strings - the first generation
+    generation_strings = init_first_generation(number_of_strings, length_of_string, abc_dictionary)
+    print(generation_strings)
 
-abc_dictionary = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'k', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T','U', 'V', 'W', 'X', 'Y', 'Z'}
-number_of_strings = 32
-length_of_string = 26
-# init_first_generation(number_of_strings, length_of_string, abc_dictionary)
+if __name__ == '__main__':
+    main()
