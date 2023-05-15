@@ -1,8 +1,10 @@
 # This file contains two functions:
 # 1. receives a dictionary and fix it to contain each english character exactly.
 # 2. mutation function - mutate the dictionary.
+import math
 import random
 from fitness import *
+import numpy as np
 
 
 def fix_permutation_dict(permutation_dict, legal_characters):
@@ -113,6 +115,8 @@ def calc_probabilities(generation_lst, encoded_file, num_of_words, common_words_
         probabilities.append(p)
     # find the best "num of bests" strings of the generation
     bests = sorted(range(len(fitness_lst)), key=lambda k: fitness_lst[k])[:num_of_bests]
+    # apply min max normalization on the probabilities
+    probabilities = [(p - min(probabilities)) / (max(probabilities) - min(probabilities)) for p in probabilities]
     return probabilities, bests
 
 
