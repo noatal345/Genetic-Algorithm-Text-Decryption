@@ -107,13 +107,9 @@ def overall_fitness(optional_alphabet_dictionary, file, num_of_words_in_file, co
     words_freq = dictionary_fitness("decrypted_file.txt", num_of_words_in_file, common_words_set)
     letters_freq = letter_frequency_fitness("decrypted_file.txt", english_letter_frequency)
     two_letters_freq = two_letter_frequency_fitness("decrypted_file.txt", english_2letter_frequency)
-    if words_freq == 0.0 or words_freq == 0:
-        os.remove("decrypted_file.txt")
-        print("if words_freq == 0")
-        return 0
-    else:
-        w1, w2, w3 = 0.5, 0.25, 0.25
-        fitness = w1 * words_freq + w2 * letters_freq + w3 * two_letters_freq
-        # remove the decrypted file
-        os.remove("decrypted_file.txt")
+    # todo delete condition
+    w1, w2, w3 = 0.5, 0.25, 0.25
+    fitness = w1 * words_freq + w2 * letters_freq + w3 * two_letters_freq
+    # remove the decrypted file
+    os.remove("decrypted_file.txt")
     return fitness
