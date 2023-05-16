@@ -91,20 +91,10 @@ def init_first_generation(num_of_strings, legal_characters):
     return list_of_strings
 
 
-def calc_probabilities(generation_lst, encoded_file, num_of_words, common_words_set, english_letter_frequency,
-                       english_2letter_frequency):
-    fitness_lst = []
-    num_of_bests = len(generation_lst)*2//100
-    # calculate the total fitness and the best string of the generation
-    total = 0
-    best_string_index = 0
-    for string in generation_lst:
-        # calculate the fitness of each string
-        fitness = overall_fitness(string, encoded_file, num_of_words, common_words_set,
-                                  english_letter_frequency, english_2letter_frequency)
-        total += fitness
-        fitness_lst.append(fitness)
-
+def calc_probabilities(generation_lst, fitness_lst):
+    # number of string to pass to the next generation as is no cross over
+    num_of_bests = len(generation_lst) * 2 // 100
+    total = sum(fitness_lst)
     # create a list of probabilities for each string in the generation
     probabilities = []
     for f in fitness_lst:
@@ -116,7 +106,8 @@ def calc_probabilities(generation_lst, encoded_file, num_of_words, common_words_
     # find the best "num of bests" strings of the generation
     bests = sorted(range(len(fitness_lst)), key=lambda k: fitness_lst[k])[:num_of_bests]
     # apply min max normalization on the probabilities
-    probabilities = [(p - min(probabilities)) / (max(probabilities) - min(probabilities)) for p in probabilities]
+    if (max(probabilities) - min(probabilities)) != 0:
+        probabilities = [(p - min(probabilities)) / (max(probabilities) - min(probabilities)) for p in probabilities]
     return probabilities, bests
 
 
@@ -124,12 +115,11 @@ def calc_probabilities(generation_lst, encoded_file, num_of_words, common_words_
 # The function returns a new list of strings where each string is a dictionary,
 # presenting the permutation of the legal characters without repeats.
 def generate_next_generation(generation_lst, encoded_file, num_of_words, legal_characters, common_words_set,
-                             english_letter_frequency, english_2letter_frequency):
+                             english_letter_frequency, english_2letter_frequency, fitness_lst):
     # create a new generation list.
     new_generation_lst = []
     # calculate probabilities for each string in the generation list
-    probabilities, bests_indexes = calc_probabilities(generation_lst, encoded_file, num_of_words, common_words_set,
-                                                          english_letter_frequency, english_2letter_frequency)
+    probabilities, bests_indexes = calc_probabilities(generation_lst, fitness_lst)
     #todo ?
     if sum(probabilities) <= 0:
         return generation_lst
