@@ -68,8 +68,8 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
         elif gen_best_fitness == best_fitness:
             count_last_best += 1
         # if the best string is the same for 10 generations, increase the mutation number
-        if count_last_best > 0 and count_last_best % 10 == 0:
-            mutation_num += 2
+        if count_num_of_generations < 1 and count_last_best % 15 == 0:
+            mutation_num += 20
             print("mutation number is :", mutation_num)
         # if the best string is the same for 20 generations after adding more mutations, stop the loop
         if count_last_best > 0 and count_last_best % 60 == 0:
@@ -121,8 +121,8 @@ def main():
     # define parameters:
     encoded_file = "enc.txt"
     common_words_set = create_english_set("dict.txt")
-    abc_dictionary = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'k', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
-                          'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}
+    abc_dictionary = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'k', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+                      'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}
     # define the number of strings in each generation
     number_of_strings = 500
 
