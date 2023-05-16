@@ -21,7 +21,7 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
     best_fitness = float("inf")
     best_index = 0
     count_last_best = 0
-    mutation_num = 3
+    mutation_num = 5
     # run the algorithm until convergence
     while 1:
         # create a new generation
@@ -33,6 +33,9 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
         gen_best_index = 0
         count_num_of_generations += 1
         generation_lst = []
+        # choose 0.2*number of strings random numbers from number_of_strings
+        indexes_to_mutate = random.sample(range(number_of_strings), int(number_of_strings * 0.2))
+        print("indexes_to_mutate", indexes_to_mutate)
         for d in new_generation_lst:
             # calculate the fitness of each string in the generation
             fitness = overall_fitness(d, encoded_file, num_of_words, common_words_set, english_letter_frequency,
@@ -43,7 +46,9 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
             # fix the new string permutations
             fixed_dict = fix_permutation_dict(d, abc_dictionary)
             # mutate the new string
-            fixed_dict = mutate_permutation_dict(fixed_dict, mutation_num)
+            current_index = new_generation_lst.index(d)
+            if current_index in indexes_to_mutate:
+                fixed_dict = mutate_permutation_dict(fixed_dict, mutation_num)
             # add the new string to the new generation
             generation_lst.append(fixed_dict)
         # at the end of each generation save the best permutation so far.
@@ -59,10 +64,11 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
             mutation_num += 1
             print("mutation number is :", mutation_num)
         # if the best string is the same for 20 generations after adding more mutations, stop the loop
-        if count_last_best > 0 and count_last_best % 30 == 0:
+        if count_last_best > 0 and count_last_best % 40 == 0:
             generation_lst = new_generation_lst
             print("break while loop")
             break
+        print("count_last_best is: " + str(count_last_best))
         print("generation number " + str(count_num_of_generations) + " best fitness is: " + str(best_fitness))
         print("best string is: " + str(generation_lst[best_index]))
 
