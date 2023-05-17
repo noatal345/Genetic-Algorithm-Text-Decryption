@@ -28,10 +28,11 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
     best_index = 0
     count_last_best = 0
     mutation_num = 5
+    count_bigger = 0
     # run the algorithm until convergence
     while 1:
         # create a new generation
-        new_generation_lst = generate_next_generation(generation_lst, encoded_file, num_of_words, abc_dictionary,
+        new_generation_lst, bests_indexes = generate_next_generation(generation_lst, encoded_file, num_of_words, abc_dictionary,
                                                       common_words_set, english_letter_frequency,
                                                       english_2letter_frequency, fitness_lst)
         # initialize variables for the new generation
@@ -39,8 +40,9 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
         gen_best_index = 0
         count_num_of_generations += 1
         generation_lst = []
-        # choose 0.2*number of strings random numbers from number_of_strings
-        indexes_to_mutate = random.sample(range(number_of_strings), int(number_of_strings * 0.3))
+        # choose 0.2*number of strings random numbers from number_of_strings-best_indexes
+        legal_range = [x for x in range(number_of_strings) if x not in bests_indexes]
+        indexes_to_mutate = random.sample(legal_range, int(len(legal_range) * 0.2))
         fitness_lst = []
 
         for d in new_generation_lst:
@@ -65,14 +67,18 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
             best_fitness = gen_best_fitness
             best_index = gen_best_index
             count_last_best = 0
+            count_bigger = 0
+            mutation_num = 5
         elif gen_best_fitness == best_fitness:
             count_last_best += 1
+        elif gen_best_fitness > best_fitness:
+            count_bigger += 1
         # if the best string is the same for 10 generations, increase the mutation number
-        if count_num_of_generations < 1 and count_last_best % 15 == 0:
-            mutation_num += 20
+        if (count_last_best > 0 and count_last_best % 15 == 0) or count_bigger > 20:
+            mutation_num += 3
             print("mutation number is :", mutation_num)
         # if the best string is the same for 20 generations after adding more mutations, stop the loop
-        if count_last_best > 0 and count_last_best % 60 == 0:
+        if count_last_best > 0 and count_last_best % 100 == 0:
             print("break while loop")
             break
         print("count_last_best is: " + str(count_last_best))

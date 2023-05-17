@@ -144,5 +144,5 @@ def generate_next_generation(generation_lst, encoded_file, num_of_words, legal_c
             new_string[legal_characters_lst[j]] = second_str[legal_characters_lst[j]]
         # add the new string to the new generation
         new_generation_lst.append(new_string)
-    return new_generation_lst
+    return new_generation_lst, bests_indexes
 
