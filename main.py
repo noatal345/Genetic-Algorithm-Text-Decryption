@@ -42,7 +42,7 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
         generation_lst = []
         # choose 0.2*number of strings random numbers from number_of_strings-best_indexes
         legal_range = [x for x in range(number_of_strings) if x not in bests_indexes]
-        indexes_to_mutate = random.sample(legal_range, int(len(legal_range) * 0.3))
+        indexes_to_mutate = random.sample(legal_range, int(len(legal_range) * 0.2))
         fitness_lst = []
 
         for d in new_generation_lst:
@@ -80,7 +80,7 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
             print("count_bigger", count_bigger)
             print("mutation number is :", mutation_num)
         # if the best string is the same for 20 generations after adding more mutations, stop the loop
-        if count_last_best > 0 and count_last_best % 200 == 0:
+        if count_last_best > 0 and count_last_best % 200 == 0 and best_fitness < 0.1:
             print("break while loop")
             break
         print("count_last_best is: " + str(count_last_best))
