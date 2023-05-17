@@ -42,7 +42,7 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
         generation_lst = []
         # choose 0.2*number of strings random numbers from number_of_strings-best_indexes
         legal_range = [x for x in range(number_of_strings) if x not in bests_indexes]
-        indexes_to_mutate = random.sample(legal_range, int(len(legal_range) * 0.2))
+        indexes_to_mutate = random.sample(legal_range, int(len(legal_range) * 0.3))
         fitness_lst = []
 
         for d in new_generation_lst:
@@ -73,12 +73,14 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
             count_last_best += 1
         elif gen_best_fitness > best_fitness:
             count_bigger += 1
+            mutation_num = 5
         # if the best string is the same for 10 generations, increase the mutation number
         if (count_last_best > 0 and count_last_best % 15 == 0) or count_bigger > 20:
-            mutation_num += 3
+            mutation_num += 2
+            print("count_bigger", count_bigger)
             print("mutation number is :", mutation_num)
         # if the best string is the same for 20 generations after adding more mutations, stop the loop
-        if count_last_best > 0 and count_last_best % 100 == 0:
+        if count_last_best > 0 and count_last_best % 200 == 0:
             print("break while loop")
             break
         print("count_last_best is: " + str(count_last_best))
@@ -130,7 +132,7 @@ def main():
     abc_dictionary = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'k', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
                       'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}
     # define the number of strings in each generation
-    number_of_strings = 500
+    number_of_strings = 250
 
     # start the genetic algorithm
     perm = start(encoded_file, common_words_set, abc_dictionary, number_of_strings)
