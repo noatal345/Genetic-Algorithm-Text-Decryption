@@ -3,6 +3,9 @@
 # 2. mutation function - mutate the dictionary.
 import math
 import random
+
+from numpy import mean
+
 from fitness import *
 import numpy as np
 
@@ -64,14 +67,14 @@ def mutate_permutation_dict(permutation_dict, num_of_mutations):
     return permutation_dict
 
 
-# This function receives a number of strings and a set of legal characters.
-# The function returns a list of strings where each string is a dictionary,
-# presenting the permutation of the legal characters without repeats.
-def init_first_generation(num_of_strings, legal_characters):
+def init_first_generation(num_of_strings, legal_characters, encoded_file, num_of_words_in_file, common_words_set,
+                          english_letter_frequency, english_2letter_frequency):
     # Create a list of strings dictionary's - The generation to return
     list_of_strings = []
     # Cope the legal_characters to a new set
     characters_left = set(legal_characters)
+    # Create a list of fitness values
+    fitness_lst = []
     # create num_of_strings number of strings with the length of length each of legal_characters permutations
     for i in range(num_of_strings):
         # create a new string dictionary
@@ -85,10 +88,68 @@ def init_first_generation(num_of_strings, legal_characters):
             characters_left.remove(char)
         # add the new string to the list of strings
         list_of_strings.append(new_string)
+        # calculate the fitness of the string
+        fitness, words_freq, letters_freq, two_letters_freq = overall_fitness(new_string, encoded_file, num_of_words_in_file,
+                                                              common_words_set, english_letter_frequency,
+                                                              english_2letter_frequency)
+        # add the fitness to the fitness list
+        fitness_lst.append(fitness)
         # Reset the characters_left set for the next string
         characters_left = set(legal_characters)
     # return the list of strings
-    return list_of_strings
+    return list_of_strings, fitness_lst
+
+
+# # This function receives a number of strings and a set of legal characters.
+# # The function returns a list of strings where each string is a dictionary,
+# # presenting the permutation of the legal characters without repeats.
+# def init_first_generation(num_of_strings, legal_characters, encoded_file, num_of_words_in_file, common_words_set,
+#                           english_letter_frequency, english_2letter_frequency):
+#     l = float("inf")
+#     l2 = float("inf")
+#     counter = 0
+#     while l > 0.0022 or l2 > 0.0000152:
+#         print("init_first_generation", counter)
+#         counter += 1
+#         fitness_lst = []
+#         l_lst = []
+#         l2_lst = []
+#         # Create a list of strings dictionary's - The generation to return
+#         list_of_strings = []
+#         # Cope the legal_characters to a new set
+#         characters_left = set(legal_characters)
+#         # create num_of_strings number of strings with the length of length each of legal_characters permutations
+#         for i in range(num_of_strings):
+#             # create a new string dictionary
+#             new_string = {}
+#             for j in legal_characters:
+#                 # choose a random character from legal_characters
+#                 char = random.choice(list(characters_left))
+#                 # add the character to the new string
+#                 new_string[j] = char
+#                 # remove the character from the set of characters left to choose from
+#                 characters_left.remove(char)
+#             # add the new string to the list of strings
+#             list_of_strings.append(new_string)
+#             # calculate the fitness of the string
+#             fitness, words_freq, letters_freq, two_letters_freq = overall_fitness(new_string, encoded_file, num_of_words_in_file,
+#                                                                   common_words_set, english_letter_frequency,
+#                                                                   english_2letter_frequency)
+#             l_lst.append(letters_freq)
+#             l2_lst.append(two_letters_freq)
+#             fitness_lst.append(fitness)
+#             # Reset the characters_left set for the next string
+#             characters_left = set(legal_characters)
+#         l = mean(l_lst)
+#         l2 = mean(l2_lst)
+#         print("l mean: ", l)
+#         print("l2 mean: ", l2)
+#         if l < 0.0022:
+#             print("l is good")
+#         if l2 < 0.000015:
+#             print("l2 is good")
+#     # return the list of strings
+#     return list_of_strings, fitness_lst
 
 
 def calc_probabilities(generation_lst, fitness_lst):
@@ -105,9 +166,9 @@ def calc_probabilities(generation_lst, fitness_lst):
         probabilities.append(p)
     # find the best "num of bests" strings of the generation
     bests = sorted(range(len(fitness_lst)), key=lambda k: fitness_lst[k])[:num_of_bests]
-    # apply min max normalization on the probabilities
-    if (max(probabilities) - min(probabilities)) != 0:
-        probabilities = [(p - min(probabilities)) / (max(probabilities) - min(probabilities)) for p in probabilities]
+    # # apply min max normalization on the probabilities
+    # if (max(probabilities) - min(probabilities)) != 0:
+    #     probabilities = [(p - min(probabilities)) / (max(probabilities) - min(probabilities)) for p in probabilities]
     return probabilities, bests
 
 

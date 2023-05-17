@@ -16,6 +16,9 @@ d = {'A': 'Y', 'B': 'X', 'C': 'I', 'D': 'N', 'E': 'T', 'F': 'O', 'G': 'Z', 'H': 
     'H', 'W': 'W', 'X': 'G', 'Y': 'A', 'Z': 'F'}
 
 
-fitness = overall_fitness(d, "enc.txt", num_of_words, common_words_set, english_letter_frequency,
+fitness, words_freq, letters_freq, two_letters_freq = overall_fitness(d, "enc.txt", num_of_words, common_words_set, english_letter_frequency,
                                       english_2letter_frequency)
-print(fitness)
+print("fitness", fitness)
+print("words_freq", words_freq)
+print("letters_freq", letters_freq)
+print("two_letters_freq", two_letters_freq)

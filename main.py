@@ -16,12 +16,8 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
     english_letter_frequency = create_dictionary("Letter_Freq.txt")
 
     # create the first generation
-    generation_lst = init_first_generation(number_of_strings, abc_dictionary)
-    fitness_lst = []
-    # calculate the first fitness list
-    for d in generation_lst:
-        fitness_lst.append(overall_fitness(d, encoded_file, num_of_words, common_words_set, english_letter_frequency,
-                                           english_2letter_frequency))
+    generation_lst, fitness_lst = init_first_generation(number_of_strings, abc_dictionary, encoded_file, num_of_words,
+                                           common_words_set, english_letter_frequency, english_2letter_frequency)
     # initialize variables
     count_num_of_generations = 0
     best_fitness = float("inf")
@@ -56,7 +52,7 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
             # add the new string to the new generation
             generation_lst.append(fixed_dict)
             # calculate the fitness of each string in the generation
-            fitness = overall_fitness(d, encoded_file, num_of_words, common_words_set, english_letter_frequency,
+            fitness, words_freq, letters_freq, two_letters_freq = overall_fitness(d, encoded_file, num_of_words, common_words_set, english_letter_frequency,
                                       english_2letter_frequency)
             fitness_lst.append(fitness)
             # save the best string of the generation
@@ -84,23 +80,25 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
         # increase the mutation number for one generation.
         if (count_last_best > 0 and count_last_best % 15 == 0) or count_bigger > 20:
             mutation_num += 1
+            mutation_rate += 0.1
             print("count_bigger", count_bigger)
+            print("mutation_rate is :", mutation_rate)
             print("mutation number is :", mutation_num)
-        # limit the mutation number to 26
-        if mutation_num > 26:
-            mutation_num = 10
+        # limit the mutation number and rate
+        if mutation_num > 13:
+            mutation_num = 5
+        if mutation_rate > 0.6:
+            mutation_rate = 0.2
         # if the best string is the same for 200 generations after adding more mutations, stop the loop
         # and return the best string.
         # if the best string is better than 0.1, stop the loop and return the best string.
         if count_last_best > 0 and count_last_best % 200 == 0:
-            mutation_rate += 0.1
-            if best_fitness < 0.1:
-                print("break while loop")
-                break
+            print("break while loop")
+            break
         print("count_last_best is: " + str(count_last_best))
         print("generation number " + str(count_num_of_generations) + " best fitness is: " + str(best_fitness))
         print("best string is: " + str(generation_lst[best_index]))
-    return generation_lst[best_index]
+    return generation_lst[best_index], best_fitness
 
 
 # This function receives a permutation dictionary and creates a file named perm.txt with the permutation.
@@ -151,8 +149,22 @@ def main():
     # define the number of strings in each generation
     number_of_strings = 250
 
-    # start the genetic algorithm
-    perm = start(encoded_file, common_words_set, abc_dictionary, number_of_strings)
+    i = 0
+    while i < 10:
+        print("*******************************************************************************************")
+        print("i is: " + str(i))
+        print("*******************************************************************************************")
+        permutetions_lst = []
+        # start the genetic algorithm
+        perm, fitness = start(encoded_file, common_words_set, abc_dictionary, number_of_strings)
+        # add the best permutation to the list
+        permutetions_lst.append((fitness, perm))
+        i += 1
+    print("permutetions_lst is: " + str(permutetions_lst))
+    # get the best permutation from the list
+    sorted_lst = sorted(permutetions_lst, key=lambda x: x[0])
+    perm = sorted_lst[0][0]
+    print("perm is: " + str(perm))
     # create a file named perm.txt and write the permutation to it
     write_permutation_to_file(perm)
     # create a file named plain.txt and write the decoded text to it
