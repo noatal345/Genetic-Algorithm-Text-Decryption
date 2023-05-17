@@ -40,13 +40,13 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
         gen_best_index = 0
         count_num_of_generations += 1
         generation_lst = []
-        # choose 0.2*number of strings random numbers from number_of_strings-best_indexes
+        # choose 0.2*number of strings random numbers from number_of_strings-best_indexes to mutate
         legal_range = [x for x in range(number_of_strings) if x not in bests_indexes]
         indexes_to_mutate = random.sample(legal_range, int(len(legal_range) * 0.2))
         fitness_lst = []
 
         for d in new_generation_lst:
-            # fix the new string permutations
+            # fix the new string permutation
             fixed_dict = fix_permutation_dict(d, abc_dictionary)
             # mutate the new string
             current_index = new_generation_lst.index(d)
@@ -58,6 +58,7 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
             fitness = overall_fitness(d, encoded_file, num_of_words, common_words_set, english_letter_frequency,
                                       english_2letter_frequency)
             fitness_lst.append(fitness)
+            # save the best string of the generation
             if fitness < gen_best_fitness:
                 gen_best_fitness = fitness
                 gen_best_index = new_generation_lst.index(d)
@@ -68,18 +69,25 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
             best_index = gen_best_index
             count_last_best = 0
             count_bigger = 0
+            # if we have a new best string, reset the mutation number
             mutation_num = 5
         elif gen_best_fitness == best_fitness:
+            # count the number of generations with the same best string
             count_last_best += 1
         elif gen_best_fitness > best_fitness:
+            # count the number of generation with a worse best string
             count_bigger += 1
             mutation_num = 5
-        # if the best string is the same for 10 generations, increase the mutation number
+        # if the best string is the same for 15 generations, increase the mutation number
+        # if the generations best string is worse than the current best string,
+        # increase the mutation number for one generation.
         if (count_last_best > 0 and count_last_best % 15 == 0) or count_bigger > 20:
             mutation_num += 2
             print("count_bigger", count_bigger)
             print("mutation number is :", mutation_num)
-        # if the best string is the same for 20 generations after adding more mutations, stop the loop
+        # if the best string is the same for 200 generations after adding more mutations, stop the loop
+        # and return the best string.
+        # if the best string is better than 0.1, stop the loop and return the best string.
         if count_last_best > 0 and count_last_best % 200 == 0 and best_fitness < 0.1:
             print("break while loop")
             break
@@ -89,6 +97,7 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
     return generation_lst[best_index]
 
 
+# This function receives a permutation dictionary and creates a file named perm.txt with the permutation.
 def write_permutation_to_file(perm):
     # create a file named perm.txt and write the permutation to it
     with open("perm.txt", "w") as f:
@@ -98,6 +107,8 @@ def write_permutation_to_file(perm):
     return f
 
 
+# This function receives a permutation dictionary and an encoded file and creates a file named plain.txt
+# with the decoded text.
 def write_decoded_text_to_file(perm, encoded_file):
     # open the file
     with open(encoded_file, 'r') as f:
