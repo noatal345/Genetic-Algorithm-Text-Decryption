@@ -27,7 +27,8 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
     best_fitness = float("inf")
     best_index = 0
     count_last_best = 0
-    mutation_num = 5
+    mutation_num = 4
+    mutation_rate = 0.2
     count_bigger = 0
     # run the algorithm until convergence
     while 1:
@@ -42,7 +43,7 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
         generation_lst = []
         # choose 0.2*number of strings random numbers from number_of_strings-best_indexes to mutate
         legal_range = [x for x in range(number_of_strings) if x not in bests_indexes]
-        indexes_to_mutate = random.sample(legal_range, int(len(legal_range) * 0.2))
+        indexes_to_mutate = random.sample(legal_range, int(len(legal_range) * mutation_rate))
         fitness_lst = []
 
         for d in new_generation_lst:
@@ -82,15 +83,20 @@ def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
         # if the generations best string is worse than the current best string,
         # increase the mutation number for one generation.
         if (count_last_best > 0 and count_last_best % 15 == 0) or count_bigger > 20:
-            mutation_num += 2
+            mutation_num += 1
             print("count_bigger", count_bigger)
             print("mutation number is :", mutation_num)
+        # limit the mutation number to 26
+        if mutation_num > 26:
+            mutation_num = 10
         # if the best string is the same for 200 generations after adding more mutations, stop the loop
         # and return the best string.
         # if the best string is better than 0.1, stop the loop and return the best string.
-        if count_last_best > 0 and count_last_best % 200 == 0 and best_fitness < 0.1:
-            print("break while loop")
-            break
+        if count_last_best > 0 and count_last_best % 200 == 0:
+            mutation_rate += 0.1
+            if best_fitness < 0.1:
+                print("break while loop")
+                break
         print("count_last_best is: " + str(count_last_best))
         print("generation number " + str(count_num_of_generations) + " best fitness is: " + str(best_fitness))
         print("best string is: " + str(generation_lst[best_index]))
