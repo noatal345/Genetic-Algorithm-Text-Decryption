@@ -1,5 +1,5 @@
 import random
-from init_varibals import ABC_SET
+from config import ABC_SET
 import Fitness_class as fit
 
 

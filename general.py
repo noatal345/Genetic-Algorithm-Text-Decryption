@@ -1,4 +1,5 @@
-from init_varibals import ABC_SET
+from config import ABC_SET
+
 
 def create_english_dictionary(filename):
     # create a hash set

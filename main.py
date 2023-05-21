@@ -1,49 +1,112 @@
 import Fitness_class as fit
 from generation_functions import *
-from init_varibals import *
+from config import *
 
 
-# use niching to find the best string
-def start(file_name):
-    fitness = fit.Fitness(file_name)
-    diff_population_lst = []
-    for i in range(10):
-        diff_population_lst.append(init_first_generation(GENERATION_SIZE))
-    for i in range(1, 1000):
-        fitness_lst_lst = []
-        best_fitness_lst = []
-        for j in range(10):
-            fitness_lst_lst.append([fitness.overall_fitness(string) for string in diff_population_lst[j]])
-            best_fitness_lst.append(min(fitness_lst_lst[j]))
-            diff_population_lst[j] = generate_next_generation(diff_population_lst[j], ABC_SET, fitness_lst_lst[j])
-        if i % 100 == 0:
-            # exchange genetic material between the populations
-            # combine all the populations
-            all_population_lst = []
-            all_fitness_lst = []
-            for population in diff_population_lst:
-                all_population_lst += population
-            for fitness_lst in fitness_lst_lst:
-                all_fitness_lst += fitness_lst
-            all_population_lst = generate_next_generation(all_population_lst, ABC_SET, all_fitness_lst)
-            # split the combined population to 10 populations
-            diff_population_lst = []
-            for k in range(10):
-                diff_population_lst.append(all_population_lst[k * GENERATION_SIZE:(k + 1) * GENERATION_SIZE])
-        print("Generation: " + str(i) + " Best Fitness: " + str(min(best_fitness_lst)))
-
-
-def run_genetic_algo(file_name):
+def run_lamarck_algo(file_name):
     fitness = fit.Fitness(file_name)
     best_string_lst = []
-    for j in range(10):
+    num_of_overall_generations = 0
+    for j in range(NUM_OF_RUNS):
         curr_gen = generate_initial_guesses(GENERATION_SIZE, fitness)
         gen_count = 0
         best_string = ""
         best_fitness = float("inf")
         best_fitness_count = 0
         min_fitness = float("inf")
-        for i in range(1000):
+        for i in range(NUM_Of_GENERATIONS):
+            gen_count += 1
+            # mutate the strings in the generation
+            mutate_gen = [mutate_permutation_dict(string, LAMARCK_MUTATION_RATE) for string in curr_gen]
+            # calculate the fitness of each string in the generation
+            mut_fitness_lst = [fitness.overall_fitness(string) for string in mutate_gen]
+            cur_fitness_lst = [fitness.overall_fitness(string) for string in curr_gen]
+            fitness_lst = []
+            for k in range(len(mut_fitness_lst)):
+                if mut_fitness_lst[k] < cur_fitness_lst[k]:
+                    fitness_lst.append(mut_fitness_lst[k])
+                    curr_gen[k] = mutate_gen[k]
+                else:
+                    fitness_lst.append(cur_fitness_lst[k])
+            min_fitness = min(fitness_lst)
+            best_string = curr_gen[fitness_lst.index(min_fitness)]
+            if min_fitness < best_fitness:
+                best_fitness = min_fitness
+                best_fitness_count = 0
+            elif min_fitness == best_fitness:
+                best_fitness_count += 1
+            else:
+                best_fitness_count = 0
+
+            if best_fitness_count > 100:
+                num_of_overall_generations += gen_count
+                break
+            curr_gen = generate_next_generation(curr_gen, ABC_SET, fitness_lst)
+            # print(str(j) + " Generation: " + str(gen_count) + " Best Fitness: " + str(
+            #     min(fitness_lst)) + " Best String index:" + str(fitness_lst.index(min(fitness_lst))))
+            if i == NUM_Of_GENERATIONS - 1:
+                num_of_overall_generations += gen_count
+        best_string_lst.append((min_fitness, best_string))
+    best_string_lst.sort(key=lambda x: x[0])
+    best_string = best_string_lst[0][1]
+    return best_string, num_of_overall_generations
+
+
+def run_darwin_algo(file_name):
+    fitness = fit.Fitness(file_name)
+    best_string_lst = []
+    num_of_overall_generations = 0
+    for j in range(NUM_OF_RUNS):
+        curr_gen = generate_initial_guesses(GENERATION_SIZE, fitness)
+        gen_count = 0
+        best_string = ""
+        best_fitness = float("inf")
+        best_fitness_count = 0
+        min_fitness = float("inf")
+        for i in range(NUM_Of_GENERATIONS):
+            gen_count += 1
+            # mutate the strings in the generation
+            mutate_gen = [mutate_permutation_dict(string, DARVIN_MUTATION_RATE) for string in curr_gen]
+            # calculate the fitness of each string in the generation
+            reg_fitness_lst = [fitness.overall_fitness(string) for string in curr_gen]
+            mut_fitness_lst = [fitness.overall_fitness(string) for string in mutate_gen]
+            fitness_lst = [min(reg_fitness_lst[i], mut_fitness_lst[i]) for i in range(len(reg_fitness_lst))]
+            min_fitness = min(fitness_lst)
+            best_string = curr_gen[fitness_lst.index(min_fitness)]
+            if min_fitness < best_fitness:
+                best_fitness = min_fitness
+                best_fitness_count = 0
+            elif min_fitness == best_fitness:
+                best_fitness_count += 1
+            else:
+                best_fitness_count = 0
+
+            if best_fitness_count > 100:
+                num_of_overall_generations += gen_count
+                break
+            curr_gen = generate_next_generation(curr_gen, ABC_SET, fitness_lst)
+            # print(str(j) + " Generation: " + str(gen_count) + " Best Fitness: " + str(
+            #     min(fitness_lst)) + " Best String index:" + str(fitness_lst.index(min(fitness_lst))))
+            if i == NUM_Of_GENERATIONS - 1:
+                num_of_overall_generations += gen_count
+        best_string_lst.append((min_fitness, best_string))
+    best_string_lst.sort(key=lambda x: x[0])
+    best_string = best_string_lst[0][1]
+    return best_string, num_of_overall_generations
+
+
+def run_regular_algo(file_name):
+    fitness = fit.Fitness(file_name)
+    best_string_lst = []
+    num_of_overall_generations = 0
+    for j in range(NUM_OF_RUNS):
+        curr_gen = generate_initial_guesses(GENERATION_SIZE, fitness)
+        gen_count = 0
+        best_string = ""
+        best_fitness = float("inf")
+        best_fitness_count = 0
+        min_fitness = float("inf")
+        for i in range(NUM_Of_GENERATIONS):
             gen_count += 1
             # calculate the fitness of each string in the generation
             fitness_lst = [fitness.overall_fitness(string) for string in curr_gen]
@@ -56,21 +119,19 @@ def run_genetic_algo(file_name):
                 best_fitness_count += 1
 
             if best_fitness_count > 100:
+                num_of_overall_generations += gen_count
                 break
-            # check for convergence
-            # convergence = check_convergence(curr_gen, fitness_lst)
-            # if convergence:
-            #     # mutate all the strings in the generation
-            #     curr_gen = [mutate_permutation_dict(string, 0.2) for string in curr_gen]
-            #     print("Convergence")
+
             curr_gen = generate_next_generation(curr_gen, ABC_SET, fitness_lst)
-            print(str(j) + " Generation: " + str(gen_count) + " Best Fitness: " + str(
-                min(fitness_lst)) + " Best String index:" + str(
-                fitness_lst.index(min(fitness_lst))))
+            # print(str(j) + " Generation: " + str(gen_count) + " Best Fitness: " + str(
+            #     min(fitness_lst)) + " Best String index:" + str(fitness_lst.index(min(fitness_lst))))
+
+            if i == NUM_Of_GENERATIONS - 1:
+                num_of_overall_generations += gen_count
         best_string_lst.append((min_fitness, best_string))
     best_string_lst.sort(key=lambda x: x[0])
     best_string = best_string_lst[0][1]
-    return best_string
+    return best_string, num_of_overall_generations
 
 
 def permute_file(optional_alphabet_dictionary, file_to_decode, decoded_file_name):
@@ -97,9 +158,18 @@ def permute_file(optional_alphabet_dictionary, file_to_decode, decoded_file_name
 
 
 if __name__ == '__main__':
+    # ask from the user to enter algo type
+    algo_type = input("Please enter the type of algorithm you want to run(R/D/L): ")
     file_name = "enc.txt"
-    # run the genetic algorithm
-    best = run_genetic_algo(file_name)
+    if algo_type == "R":
+        best, num_of_generations = run_regular_algo(file_name)
+    elif algo_type == "D":
+        best, num_of_generations = run_darwin_algo(file_name)
+    elif algo_type == "L":
+        best, num_of_generations = run_lamarck_algo(file_name)
+    else:
+        print("Invalid input")
+        exit(1)
     # save the best string to a file named perm.txt
     abc_lst = list(ABC_SET)
     abc_lst.sort()
@@ -109,5 +179,4 @@ if __name__ == '__main__':
     f.close()
     # save the plaintext to a file named plain.txt
     permute_file(best, file_name, "plain.txt")
-
-    print(best)
+    print("the overall number of generations is: " + str(num_of_generations))

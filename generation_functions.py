@@ -1,6 +1,6 @@
 import random
 import math
-from init_varibals import ELITE_SIZE, MUTATION_RATE, ABC_SET
+from config import ELITE_SIZE, MUTATION_RATE, ABC_SET
 
 
 def init_first_generation(num_of_strings, legal_characters=ABC_SET):
@@ -81,13 +81,14 @@ def fix_permutation_dict(permutation_dict):
 
 
 def mutate_permutation_dict(permutation_dict, mutation_rate=MUTATION_RATE):
-    for key1 in permutation_dict.keys():
+    permutation_dict_copy = permutation_dict.copy()
+    for key1 in permutation_dict_copy.keys():
         if random.random() < mutation_rate:
-            key2 = random.choice(list(permutation_dict.keys()))
+            key2 = random.choice(list(permutation_dict_copy.keys()))
             # Swap the values of the two keys
-            permutation_dict[key1], permutation_dict[key2] = permutation_dict[key2], permutation_dict[key1]
+            permutation_dict_copy[key1], permutation_dict_copy[key2] = permutation_dict_copy[key2], permutation_dict_copy[key1]
 
-    return permutation_dict
+    return permutation_dict_copy
 
 
 def generate_initial_guesses(num_guesses, fitness):
@@ -166,3 +167,8 @@ def generate_next_generation(generation_lst, legal_characters, fitness_lst):
         # add the new string to the new generation
         new_generation_lst.append(new_string)
     return new_generation_lst
+
+
+def local_optimization(perm):
+    pass
+
