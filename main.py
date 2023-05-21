@@ -1,186 +1,113 @@
-# This is the main program
-# This program receives aan encoded txt file and decodes the file content using a genetic algorithm.
-# the program creates 2 new files:
-# 1. plain.txt an encrypted txt file of the original encoded file.
-# 2. perm.txt which will contain its permutation.
-
+import Fitness_class as fit
 from generation_functions import *
-from general import *
+from init_varibals import *
 
 
-def start(encoded_file, common_words_set, abc_dictionary, number_of_strings):
-    # save the number of words and chars from the encoded file into parameters
-    num_of_words, num_of_chars = count_words(encoded_file)
-    # save the characters frequencies in dictionaries
-    english_2letter_frequency = create_dictionary("Letter2_Freq.txt")
-    english_letter_frequency = create_dictionary("Letter_Freq.txt")
+# use niching to find the best string
+def start(file_name):
+    fitness = fit.Fitness(file_name)
+    diff_population_lst = []
+    for i in range(10):
+        diff_population_lst.append(init_first_generation(GENERATION_SIZE))
+    for i in range(1, 1000):
+        fitness_lst_lst = []
+        best_fitness_lst = []
+        for j in range(10):
+            fitness_lst_lst.append([fitness.overall_fitness(string) for string in diff_population_lst[j]])
+            best_fitness_lst.append(min(fitness_lst_lst[j]))
+            diff_population_lst[j] = generate_next_generation(diff_population_lst[j], ABC_SET, fitness_lst_lst[j])
+        if i % 100 == 0:
+            # exchange genetic material between the populations
+            # combine all the populations
+            all_population_lst = []
+            all_fitness_lst = []
+            for population in diff_population_lst:
+                all_population_lst += population
+            for fitness_lst in fitness_lst_lst:
+                all_fitness_lst += fitness_lst
+            all_population_lst = generate_next_generation(all_population_lst, ABC_SET, all_fitness_lst)
+            # split the combined population to 10 populations
+            diff_population_lst = []
+            for k in range(10):
+                diff_population_lst.append(all_population_lst[k * GENERATION_SIZE:(k + 1) * GENERATION_SIZE])
+        print("Generation: " + str(i) + " Best Fitness: " + str(min(best_fitness_lst)))
 
-    # create the first generation
-    generation_lst, fitness_lst = init_first_generation(number_of_strings, abc_dictionary, encoded_file, num_of_words,
-                                           common_words_set, english_letter_frequency, english_2letter_frequency)
-    # initialize variables
-    count_num_of_generations = 0
-    best_fitness = float("inf")
-    best_index = 0
-    count_last_best = 0
-    mutation_num = 4
-    mutation_rate = 0.2
-    count_bigger = 0
-    # run the algorithm until convergence
-    while 1:
-        # create a new generation
-        new_generation_lst, bests_indexes = generate_next_generation(generation_lst, encoded_file, num_of_words, abc_dictionary,
-                                                      common_words_set, english_letter_frequency,
-                                                      english_2letter_frequency, fitness_lst)
-        # initialize variables for the new generation
-        gen_best_fitness = float("inf")
-        gen_best_index = 0
-        count_num_of_generations += 1
-        generation_lst = []
-        # choose 0.2*number of strings random numbers from number_of_strings-best_indexes to mutate
-        legal_range = [x for x in range(number_of_strings) if x not in bests_indexes]
-        indexes_to_mutate = random.sample(legal_range, int(len(legal_range) * mutation_rate))
-        fitness_lst = []
 
-        for d in new_generation_lst:
-            # fix the new string permutation
-            fixed_dict = fix_permutation_dict(d, abc_dictionary)
-            # mutate the new string
-            current_index = new_generation_lst.index(d)
-            if current_index in indexes_to_mutate:
-                fixed_dict = mutate_permutation_dict(fixed_dict, mutation_num)
-            # add the new string to the new generation
-            generation_lst.append(fixed_dict)
+def run_genetic_algo(file_name):
+    fitness = fit.Fitness(file_name)
+    best_string_lst = []
+    for j in range(10):
+        curr_gen = generate_initial_guesses(GENERATION_SIZE, fitness)
+        gen_count = 0
+        best_string = ""
+        best_fitness = float("inf")
+        best_fitness_count = 0
+        min_fitness = float("inf")
+        for i in range(1000):
+            gen_count += 1
             # calculate the fitness of each string in the generation
-            fitness, words_freq, letters_freq, two_letters_freq = overall_fitness(d, encoded_file, num_of_words, common_words_set, english_letter_frequency,
-                                      english_2letter_frequency)
-            fitness_lst.append(fitness)
-            # save the best string of the generation
-            if fitness < gen_best_fitness:
-                gen_best_fitness = fitness
-                gen_best_index = new_generation_lst.index(d)
-        # at the end of each generation save the best permutation so far.
-        # and count the number of generations with the same best string
-        if gen_best_fitness < best_fitness:
-            best_fitness = gen_best_fitness
-            best_index = gen_best_index
-            count_last_best = 0
-            count_bigger = 0
-            # if we have a new best string, reset the mutation number
-            mutation_num = 5
-        elif gen_best_fitness == best_fitness:
-            # count the number of generations with the same best string
-            count_last_best += 1
-        elif gen_best_fitness > best_fitness:
-            # count the number of generation with a worse best string
-            count_bigger += 1
-            mutation_num = 5
-        # if the best string is the same for 15 generations, increase the mutation number
-        # if the generations best string is worse than the current best string,
-        # increase the mutation number for one generation.
-        if (count_last_best > 0 and count_last_best % 15 == 0) or count_bigger > 20:
-            mutation_num += 1
-            mutation_rate += 0.1
-            print("count_bigger", count_bigger)
-            print("mutation_rate is :", mutation_rate)
-            print("mutation number is :", mutation_num)
-        # limit the mutation number and rate
-        if mutation_num > 13:
-            mutation_num = 5
-        if mutation_rate > 0.6:
-            mutation_rate = 0.2
-        # if the best string is the same for 200 generations after adding more mutations, stop the loop
-        # and return the best string.
-        # if the best string is better than 0.1, stop the loop and return the best string.
-        if count_last_best > 0 and count_last_best % 200 == 0:
-            print("break while loop")
-            break
-        print("count_last_best is: " + str(count_last_best))
-        print("generation number " + str(count_num_of_generations) + " best fitness is: " + str(best_fitness))
-        print("best string is: " + str(generation_lst[best_index]))
-    return generation_lst[best_index], best_fitness
-
-
-# This function receives a permutation dictionary and creates a file named perm.txt with the permutation.
-def write_permutation_to_file(perm):
-    # create a file named perm.txt and write the permutation to it
-    with open("perm.txt", "w") as f:
-        for key, value in perm.items():
-            f.write(key + "\t" + value + "\n")
-    f.close()
-    return f
-
-
-# This function receives a permutation dictionary and an encoded file and creates a file named plain.txt
-# with the decoded text.
-def write_decoded_text_to_file(perm, encoded_file):
-    # open the file
-    with open(encoded_file, 'r') as f:
-        # read the file
-        file = f.read().upper()
-        # create a new file
-        new_file = open("plain.txt", "w")
-        # for each letter in the encoded file, if the letter is in the perm dictionary, replace it with
-        # the value from the perm dictionary.
-        # if the letter is not in the perm dictionary, leave it as is.
-        for letter in file:
-            if letter.isalpha():
-                if letter in perm.keys():
-                    new_file.write(perm[letter])
-                else:
-                    new_file.write(letter)
+            fitness_lst = [fitness.overall_fitness(string) for string in curr_gen]
+            min_fitness = min(fitness_lst)
+            best_string = curr_gen[fitness_lst.index(min_fitness)]
+            if min_fitness < best_fitness:
+                best_fitness = min_fitness
+                best_fitness_count = 0
             else:
-                new_file.write(letter)
+                best_fitness_count += 1
+
+            if best_fitness_count > 100:
+                break
+            # check for convergence
+            # convergence = check_convergence(curr_gen, fitness_lst)
+            # if convergence:
+            #     # mutate all the strings in the generation
+            #     curr_gen = [mutate_permutation_dict(string, 0.2) for string in curr_gen]
+            #     print("Convergence")
+            curr_gen = generate_next_generation(curr_gen, ABC_SET, fitness_lst)
+            print(str(j) + " Generation: " + str(gen_count) + " Best Fitness: " + str(
+                min(fitness_lst)) + " Best String index:" + str(
+                fitness_lst.index(min(fitness_lst))))
+        best_string_lst.append((min_fitness, best_string))
+    best_string_lst.sort(key=lambda x: x[0])
+    best_string = best_string_lst[0][1]
+    return best_string
 
 
-def main():
-    # todo delete example
-    # encoded_file = "test.txt"
-    # common_words_set = create_english_set("new_dict.txt")
-    # abc_dictionary = {'A', 'B', 'C'}
-    # # define the number of strings in each generation
-    # number_of_strings = 6
-
-    # define parameters:
-    encoded_file = "enc.txt"
-    common_words_set = create_english_set("dict.txt")
-    abc_dictionary = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'k', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-                      'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}
-    # define the number of strings in each generation
-    number_of_strings = 250
-
-    i = 0
-    while i < 10:
-        print("*******************************************************************************************")
-        print("i is: " + str(i))
-        print("*******************************************************************************************")
-        permutetions_lst = []
-        # start the genetic algorithm
-        perm, fitness = start(encoded_file, common_words_set, abc_dictionary, number_of_strings)
-        # add the best permutation to the list
-        permutetions_lst.append((fitness, perm))
-        i += 1
-    print("permutetions_lst is: " + str(permutetions_lst))
-    # get the best permutation from the list
-    sorted_lst = sorted(permutetions_lst, key=lambda x: x[0])
-    perm = sorted_lst[0][0]
-    print("perm is: " + str(perm))
-    # create a file named perm.txt and write the permutation to it
-    write_permutation_to_file(perm)
-    # create a file named plain.txt and write the decoded text to it
-    write_decoded_text_to_file(perm, encoded_file)
-    # print thr permutation from the perm.txt file
-    with open("perm.txt", 'r') as f:
-        file = f.read().upper()
-        print(file)
-    f.close()
-
-    # read the decoded text from the file plain.txt
-    with open("plain.txt", 'r') as f:
-        file = f.read().upper()
-        print(file)
+def permute_file(optional_alphabet_dictionary, file_to_decode, decoded_file_name):
+    # open the file
+    with open(file_to_decode, 'r') as f:
+        # read the file
+        file_to_decode = f.read().upper()
+        # create a new file
+        new_file = open(decoded_file_name, "w")
+        # for each letter in the file, if the letter is in the optinal_alphabet_dictionary, replace it with
+        # the value from the optional_alphabet_dictionary.
+        # if the letter is not in the optional_alphabet_dictionary, leave it as is.
+        # if the char is not a letter, leave it as is.
+        for letter in file_to_decode:
+            if letter.isalpha():
+                if letter in optional_alphabet_dictionary:
+                    new_file.write(optional_alphabet_dictionary[letter].lower())
+                else:
+                    new_file.write(letter.lower())
+            else:
+                new_file.write(letter.lower())
+    new_file.close()
     f.close()
 
 
 if __name__ == '__main__':
-    main()
+    file_name = "enc.txt"
+    # run the genetic algorithm
+    best = run_genetic_algo(file_name)
+    # save the best string to a file named perm.txt
+    abc_lst = list(ABC_SET)
+    abc_lst.sort()
+    with open("perm.txt", "w") as f:
+        for letter in abc_lst:
+            f.write(letter.lower() + " " + best[letter] + "\n")
+    f.close()
+    # save the plaintext to a file named plain.txt
+    permute_file(best, file_name, "plain.txt")
+
+    print(best)

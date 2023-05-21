@@ -1,21 +1,17 @@
-# This file contains general functions that are used in the to initiate the main.py file.
+from init_varibals import ABC_SET
 
-# convert the dict.txt file to a set of words.
-def create_english_set(filename):
+def create_english_dictionary(filename):
     # create a hash set
-    english_set = set()
+    english_dict = set()
     # open filename and append each value in each row to the english dictionary.
     with open(filename) as f:
         for line in f:
-            english_set.add(line.upper().strip())
+            english_dict.add(line.upper().strip())
     # close file
     f.close()
-    return english_set
+    return english_dict
 
 
-# This function receives a path to a txt file as argument.
-# The function reads the file and creates a dictionary from the file.
-# The function returns the new dictionary where the key is the first word and the value is the second of each row.
 def create_dictionary(filename):
     new_dict = {}
     # open the filename and read each line.
@@ -38,29 +34,59 @@ def create_dictionary(filename):
     return new_dict
 
 
-# This function receives a path to a txt file as argument and return the number of characters and words in it
-def count_words(filename):
-    # create a set of characters that are not part of a word.
-    characters = {".", ",", " ", "\n", ";"}
-    # set of word delimiters
-    new_word_delimiter = {" ", "\n"}
-    numer_of_words, special_char, total_chars = 0, 0, 0
-    flag_word = False
-    # open filename and count the number characters and the number of words in the file.
-    with open(filename) as f:
+def count_words(file):
+    num_of_words = 0
+    with open(file, 'r') as f:
         for line in f:
-            for char in line:
-                total_chars += 1
-                if char in characters:
-                    special_char += 1
-                    if char in new_word_delimiter:
-                        if flag_word:
-                            numer_of_words += 1
-                            flag_word = False
-                else:
-                    flag_word = True
-    number_of_char = total_chars - special_char
-    # close file
+            words = line.strip().split()
+            num_of_words += len(words)
     f.close()
-    return numer_of_words, number_of_char
+    return num_of_words
 
+
+def file_letter_freq(file):
+    file_letter_frequency = {}
+    available_letters = ABC_SET.copy()
+    # open the file
+    with open(file, 'r') as f:
+        # read the file
+        file = f.read().upper()
+        # count the number of time each letter appears in the file
+        for letter in file:
+            if letter.isalpha():  # Only count letters
+                if letter in file_letter_frequency:
+                    file_letter_frequency[letter] += 1
+                else:
+                    file_letter_frequency[letter] = 1
+                    # remove the letter from the available_letters
+                    available_letters.remove(letter)
+    f.close()
+    # add the letters that are not in the file to the file_letter_frequency dictionary
+    for letter in available_letters:
+        file_letter_frequency[letter] = 0
+    # normalize the counts to get frequencies
+    total_count = sum(file_letter_frequency.values())
+    file_letter_frequency = {letter: count / total_count for letter, count in file_letter_frequency.items()}
+    return file_letter_frequency
+
+
+def file_two_letters_freq(file):
+    file_2letter_frequency = {}
+    # open the file
+    with open(file, 'r') as f:
+        # read the file
+        file = f.read().upper()
+        # count the number of time each letter appears in the file
+        for i in range(len(file) - 1):
+            two_letter = file[i:i + 2]
+            if two_letter.isalpha():
+                if two_letter in file_2letter_frequency:
+                    file_2letter_frequency[two_letter] += 1
+                else:
+                    file_2letter_frequency[two_letter] = 1
+        # normalize the counts to get frequencies
+        total_count = sum(file_2letter_frequency.values())
+        file_2letter_frequency = {two_letter: count / total_count for two_letter, count in
+                                  file_2letter_frequency.items()}
+    f.close()
+    return file_2letter_frequency
