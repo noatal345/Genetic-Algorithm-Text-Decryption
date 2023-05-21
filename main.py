@@ -1,6 +1,10 @@
+from asyncio import sleep
+
 import Fitness_class as fit
 from generation_functions import *
 from config import *
+import sys
+import tkinter as tk
 
 
 def run_lamarck_algo(file_name):
@@ -42,8 +46,6 @@ def run_lamarck_algo(file_name):
                 num_of_overall_generations += gen_count
                 break
             curr_gen = generate_next_generation(curr_gen, ABC_SET, fitness_lst)
-            # print(str(j) + " Generation: " + str(gen_count) + " Best Fitness: " + str(
-            #     min(fitness_lst)) + " Best String index:" + str(fitness_lst.index(min(fitness_lst))))
             if i == NUM_Of_GENERATIONS - 1:
                 num_of_overall_generations += gen_count
         best_string_lst.append((min_fitness, best_string))
@@ -85,8 +87,6 @@ def run_darwin_algo(file_name):
                 num_of_overall_generations += gen_count
                 break
             curr_gen = generate_next_generation(curr_gen, ABC_SET, fitness_lst)
-            # print(str(j) + " Generation: " + str(gen_count) + " Best Fitness: " + str(
-            #     min(fitness_lst)) + " Best String index:" + str(fitness_lst.index(min(fitness_lst))))
             if i == NUM_Of_GENERATIONS - 1:
                 num_of_overall_generations += gen_count
         best_string_lst.append((min_fitness, best_string))
@@ -123,8 +123,6 @@ def run_regular_algo(file_name):
                 break
 
             curr_gen = generate_next_generation(curr_gen, ABC_SET, fitness_lst)
-            # print(str(j) + " Generation: " + str(gen_count) + " Best Fitness: " + str(
-            #     min(fitness_lst)) + " Best String index:" + str(fitness_lst.index(min(fitness_lst))))
 
             if i == NUM_Of_GENERATIONS - 1:
                 num_of_overall_generations += gen_count
@@ -158,9 +156,10 @@ def permute_file(optional_alphabet_dictionary, file_to_decode, decoded_file_name
 
 
 if __name__ == '__main__':
-    # ask from the user to enter algo type
-    algo_type = input("Please enter the type of algorithm you want to run(R/D/L): ")
+    algo_type = input("Please choose the algorithm type R/D/L:")
+
     file_name = "enc.txt"
+
     if algo_type == "R":
         best, num_of_generations = run_regular_algo(file_name)
     elif algo_type == "D":
@@ -180,3 +179,5 @@ if __name__ == '__main__':
     # save the plaintext to a file named plain.txt
     permute_file(best, file_name, "plain.txt")
     print("the overall number of generations is: " + str(num_of_generations))
+    # ask the user to press enter to exit the program
+    input("Press Enter to exit")
