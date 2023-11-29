@@ -38,7 +38,7 @@ Several approaches are explored to address the early convergence problem, includ
 
 ## Usage
 
-To run the decryption algorithm, execute the `py.main` file. Adjust the parameters in the `py.config` file as needed.
+To run the decryption algorithm, execute the `main.py` file. Adjust the parameters in the `config.py` file as needed.
 
 ## Results
 
